@@ -1,68 +1,146 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
-import { musicas } from '../dados/musicas';
+import { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, FlatList, ScrollView } from 'react-native';
+import { musicas, categorias } from '../dados/musicas';
+import { useMusicaContext } from '../context/MusicaContext';
+import { MusicaCard } from '../components/MusicaCard';
+import { SectionHeader } from '../components/SectionHeader';
+import { SearchBar } from '../components/SearchBar';
+import { EmptyState } from '../components/EmptyState';
 
 export default function TelaInicial({ navigation }) {
-  const [musicasFavoritas, setMusicasFavoritas] = useState([]);
+  const { adicionarFavorito, adicionarAoHistorico } = useMusicaContext();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-  const adicionarFavorito = (id) => {
-    if (musicasFavoritas.includes(id)) {
-      setMusicasFavoritas(musicasFavoritas.filter(fav => fav !== id));
-    } else {
-      setMusicasFavoritas([...musicasFavoritas, id]);
+  const musicasFiltradas = useMemo(() => {
+    let resultado = musicas;
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      resultado = resultado.filter(
+        (m) =>
+          m.titulo.toLowerCase().includes(query) ||
+          m.artista.toLowerCase().includes(query) ||
+          m.album.toLowerCase().includes(query)
+      );
     }
+
+    if (selectedCategory) {
+      const categoria = categorias.find((c) => c.id === selectedCategory);
+      if (categoria) {
+        resultado = resultado.filter((m) =>
+          categoria.generos.includes(m.genero)
+        );
+      }
+    }
+
+    return resultado;
+  }, [searchQuery, selectedCategory]);
+
+  const handleMusicaPress = (musica) => {
+    adicionarAoHistorico(musica);
+    navigation.navigate('TocandoMusica', { musica });
   };
 
-  const renderMusicaCard = ({ item }) => (
-    <TouchableOpacity
-      style={estilos.cardMusica}
-      onPress={() =>
-        navigation.navigate('TocandoMusica', {
-          musica: item,
-          musicasFavoritas,
-          setMusicasFavoritas,
-        })
-      }
-    >
-      <View style={estilos.iconeAlbum}>
-        <Text style={estilos.emojiCapa}>{item.capa}</Text>
-      </View>
-      <View style={estilos.infoMusica}>
-        <Text style={estilos.tituloMusica}>{item.titulo}</Text>
-        <Text style={estilos.artista}>{item.artista}</Text>
-        <Text style={estilos.duracao}>{item.duracao}</Text>
-      </View>
-      <TouchableOpacity
-        style={estilos.botaoFavorito}
-        onPress={() => adicionarFavorito(item.id)}
-      >
-        <Text style={estilos.iconeFavorito}>
-          {musicasFavoritas.includes(item.id) ? '❤️' : '🤍'}
-        </Text>
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
+  const handleFavoritoPress = (musicaId) => {
+    adicionarFavorito(musicaId);
+  };
 
   return (
     <View style={estilos.container}>
-      <View style={estilos.header}>
-        <Text style={estilos.saudacao}>Bem-vindo ao</Text>
-        <Text style={estilos.nomeApp}>SoundWave</Text>
-      </View>
+      <SectionHeader
+        title="MusicFlow"
+        subtitle="Sua música, seu ritmo"
+      />
 
-      <ScrollView style={estilos.secoes}>
-        <View style={estilos.secao}>
-          <View style={estilos.cabecalhoSecao}>
-            <Text style={estilos.tituloSecao}>🎵 Recomendado para você</Text>
-          </View>
-          <FlatList
-            data={musicas}
-            renderItem={renderMusicaCard}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-          />
+      <SearchBar
+        onSearch={setSearchQuery}
+        onFilterPress={() => {}}
+      />
+
+      {searchQuery.trim() ? (
+        <View style={estilos.content}>
+          {musicasFiltradas.length > 0 ? (
+            <>
+              <View style={estilos.searchResultHeader}>
+                <Text style={estilos.searchResultTitle}>
+                  🔍 {musicasFiltradas.length} resultado{musicasFiltradas.length !== 1 ? 's' : ''}
+                </Text>
+              </View>
+              <FlatList
+                data={musicasFiltradas}
+                renderItem={({ item }) => (
+                  <MusicaCard
+                    musica={item}
+                    onPress={() => handleMusicaPress(item)}
+                    onPressFavorito={handleFavoritoPress}
+                    showGenero
+                  />
+                )}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={estilos.listPadding}
+                scrollEnabled={false}
+              />
+            </>
+          ) : (
+            <EmptyState
+              emoji="🎵"
+              title="Nenhuma música encontrada"
+              description={`Nenhuma música encontrada para "${searchQuery}"`}
+            />
+          )}
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView style={estilos.content} showsVerticalScrollIndicator={false}>
+          <View style={estilos.categorySection}>
+            <Text style={estilos.categoriaTitle}>📂 Categorias</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={estilos.categoriasList}
+            >
+              {categorias.map((cat) => (
+                <View
+                  key={cat.id}
+                  style={[
+                    estilos.categoriaCard,
+                    selectedCategory === cat.id && estilos.categoriaCardActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      estilos.categoriaText,
+                      selectedCategory === cat.id && estilos.categoriaTextActive,
+                    ]}
+                    onPress={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                  >
+                    {cat.nome}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={estilos.secao}>
+            <View style={estilos.cabecalhoSecao}>
+              <Text style={estilos.tituloSecao}>🎵 {selectedCategory ? 'Filtrado' : 'Recomendado para você'}</Text>
+            </View>
+            <FlatList
+              data={selectedCategory ? musicasFiltradas : musicas}
+              renderItem={({ item }) => (
+                <MusicaCard
+                  musica={item}
+                  onPress={() => handleMusicaPress(item)}
+                  onPressFavorito={handleFavoritoPress}
+                  showGenero
+                />
+              )}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -72,24 +150,55 @@ const estilos = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0F0F1E',
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: '#1A1A2E',
-  },
-  saudacao: {
-    fontSize: 14,
-    color: '#999',
-    marginBottom: 5,
-  },
-  nomeApp: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#8B5FBF',
-  },
-  secoes: {
+  content: {
     flex: 1,
     paddingHorizontal: 15,
+  },
+  listPadding: {
+    paddingBottom: 20,
+  },
+  searchResultHeader: {
+    paddingVertical: 12,
+    paddingHorizontal: 5,
+  },
+  searchResultTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#8B5FBF',
+  },
+  categorySection: {
+    marginTop: 16,
+    marginBottom: 20,
+  },
+  categoriaTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFF',
+    marginBottom: 12,
+  },
+  categoriasList: {
+    gap: 8,
+    paddingRight: 15,
+  },
+  categoriaCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#1A1A2E',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  categoriaCardActive: {
+    backgroundColor: '#8B5FBF',
+    borderColor: '#FF69B4',
+  },
+  categoriaText: {
+    color: '#999',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  categoriaTextActive: {
+    color: '#FFF',
   },
   secao: {
     marginTop: 20,
@@ -102,51 +211,5 @@ const estilos = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFF',
-  },
-  cardMusica: {
-    flexDirection: 'row',
-    backgroundColor: '#1A1A2E',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF69B4',
-  },
-  iconeAlbum: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#8B5FBF',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  emojiCapa: {
-    fontSize: 32,
-  },
-  infoMusica: {
-    flex: 1,
-  },
-  tituloMusica: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginBottom: 4,
-  },
-  artista: {
-    fontSize: 13,
-    color: '#999',
-    marginBottom: 4,
-  },
-  duracao: {
-    fontSize: 12,
-    color: '#666',
-  },
-  botaoFavorito: {
-    padding: 8,
-  },
-  iconeFavorito: {
-    fontSize: 20,
   },
 });

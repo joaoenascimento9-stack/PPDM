@@ -1,50 +1,134 @@
-# Welcome to your Expo app 👋
+# 🎵 MusicFlow - Aplicativo de Streaming de Música
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Uma aplicação moderna de streaming de música construída com **React Native** e **Expo**, apresentando uma interface elegante, navegação intuitiva e funcionalidades completas.
 
-## Get started
+## ✨ Destaques da Versão Melhorada
 
-1. Install dependencies
+### 🎯 Novas Telas (3 adicionadas)
+- **Explorar** 🧭 - Descubra músicas por categoria e gênero
+- **Histórico** ⏱️ - Veja seu histórico de reproduções
+- **Perfil** 👤 - Gerencie sua conta e veja estatísticas
 
-   ```bash
-   npm install
-   ```
+### 🔧 Novas Funcionalidades
+- ✅ Busca em tempo real com filtros
+- ✅ Categorias de gêneros interativas (4)
+- ✅ Histórico de reprodução automático
+- ✅ Context API para gerenciamento global de estado
+- ✅ 6 componentes reutilizáveis
+- ✅ Validação robusta de formulários
+- ✅ 15 músicas com metadata completa
 
-2. Start the app
+### 🎨 Melhorias de Design
+- ✅ Interface elegante com cores modernas
+- ✅ Cards com feedback visual
+- ✅ Ícones dinâmicos no navigation
+- ✅ Animações suaves
+- ✅ Estados vazios personalizados
+- ✅ Design responsivo
 
-   ```bash
-   npx expo start
-   ```
+## 📸 Estrutura de Navegação
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+┌─────────────────────────────────┐
+│      MusicFlow App              │
+├─────────────────────────────────┤
+│  Login / Cadastro               │
+│           ↓                      │
+├─────────────────────────────────┤
+│  🏠 Início │ 🧭 Explorar │ ❤️ Favoritos │ ⏱️ Histórico │ 👤 Perfil │
+├─────────────────────────────────┤
+│  - Busca & Filtros              │
+│  - Categorias                   │
+│  - Cards de Música              │
+│           ↓                      │
+│  🎵 Tocando Música Player       │
+└─────────────────────────────────┘
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🚀 Como Começar
 
-## Learn more
+### Instalação
+```bash
+# Instalar dependências
+npm install
 
-To learn more about developing your project with Expo, look at the following resources:
+# Iniciar o app
+npx expo start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Testar
+```bash
+# Android Emulator
+npx expo start --android
 
-## Join the community
+# iOS Simulator
+npx expo start --ios
 
-Join our community of developers creating universal apps.
+# Web (Preview)
+npx expo start --web
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📋 Credenciais de Teste
+
+- **Email:** qualquer email válido (ex: usuario@example.com)
+- **Senha:** mínimo 6 caracteres
+
+## 📁 Estrutura do Projeto
+
+```
+app/
+├── components/           # 6 componentes reutilizáveis
+├── context/              # Context API global
+├── dados/                # 15 músicas + 4 categorias
+├── pages/                # 8 telas (3 novas!)
+├── routes/               # Navegação (5 abas)
+└── index.jsx             # Provider wrapper
+```
+
+## 🎨 Paleta de Cores
+
+- 🟣 Roxo Primário: #8B5FBF
+- 🌸 Rosa Neon: #FF69B4
+- ⬛ Preto Escuro: #0F0F1E
+- 🔘 Cinza Escuro: #1A1A2E
+
+## 📊 Melhorias Implementadas
+
+| Aspecto | Antes | Depois |
+|---------|-------|--------|
+| Telas | 5 | **8** (+3) |
+| Músicas | 10 | **15** |
+| Componentes | Inline | **6 Reutilizáveis** |
+| Estado | Props Drilling | **Context API** |
+| Busca | ❌ | ✅ Em Tempo Real |
+| Filtros | ❌ | ✅ Por Categoria |
+| Histórico | ❌ | ✅ Automático |
+
+## 📚 Funcionalidades Principais
+
+- ✅ **Login/Cadastro** com validações robustas
+- ✅ **Busca** em tempo real com filtros
+- ✅ **Categorias** de gêneros (4)
+- ✅ **Historico** de reproduções
+- ✅ **Favoritos** gerenciados globalmente
+- ✅ **Player** com controles completos
+- ✅ **Perfil** com estatísticas
+- ✅ **Logout** seguro
+
+## 🔧 Tecnologias
+
+- React Native 0.81.5
+- Expo 54.0.33
+- React Navigation
+- Context API
+- Ionicons
+
+## 📖 Documentação
+
+- [MELHORIAS.md](./MELHORIAS.md) - Detalhes técnicos
+- [GUIA_TESTE.md](./GUIA_TESTE.md) - Como testar
+- [GUIA_FUNCIONALIDADES.md](./GUIA_FUNCIONALIDADES.md) - Funcionalidades
+
+---
+
+**Versão:** 2.0.0 (Melhorada) ✨

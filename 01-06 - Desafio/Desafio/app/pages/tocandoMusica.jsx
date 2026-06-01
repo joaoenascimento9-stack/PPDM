@@ -1,11 +1,39 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useMusicaContext } from '../context/MusicaContext';
+import { Button } from '../components/Button';
 
 export default function TocandoMusica({ route, navigation }) {
   const { musica } = route.params || {};
+  const { adicionarFavorito, isFavorita } = useMusicaContext();
   const [tocando, setTocando] = useState(true);
-  const [isFavorita, setIsFavorita] = useState(false);
   const [progresso, setProgresso] = useState(0);
+  const [tempoAtual, setTempoAtual] = useState('0:00');
+  const [volume, setVolume] = useState(70);
+
+  const favoritada = isFavorita(musica?.id);
+
+  useEffect(() => {
+    if (!tocando) return;
+
+    const intervalo = setInterval(() => {
+      setProgresso((prev) => {
+        if (prev >= 100) {
+          setTocando(false);
+          return 0;
+        }
+        return prev + 2;
+      });
+    }, 500);
+
+    return () => clearInterval(intervalo);
+  }, [tocando]);
+
+  useEffect(() => {
+    const minutos = Math.floor((progresso / 100) * 180);
+    const segundos = Math.floor(((progresso / 100) * 180) % 60);
+    setTempoAtual(`${minutos}:${segundos.toString().padStart(2, '0')}`);
+  }, [progresso]);
 
   if (!musica) {
     return (
@@ -15,23 +43,18 @@ export default function TocandoMusica({ route, navigation }) {
     );
   }
 
-  const simularProgresso = () => {
-    if (progresso < 100) {
-      setProgresso(progresso + 10);
-    } else {
-      setProgresso(0);
-    }
+  const proximaMusica = () => {
+    setProgresso(0);
+    setTocando(true);
+  };
+
+  const musicaAnterior = () => {
+    setProgresso(0);
+    setTocando(true);
   };
 
   return (
-    <View style={estilos.container}>
-      <TouchableOpacity
-        style={estilos.botaoVoltar}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={estilos.textoBotaoVoltar}>← Voltar</Text>
-      </TouchableOpacity>
-
+    <ScrollView style={estilos.container} showsVerticalScrollIndicator={false}>
       {/* Capa do álbum */}
       <View style={estilos.capaMaior}>
         <Text style={estilos.emojiCapaMaior}>{musica.capa}</Text>
@@ -42,6 +65,7 @@ export default function TocandoMusica({ route, navigation }) {
         <Text style={estilos.tituloMusica}>{musica.titulo}</Text>
         <Text style={estilos.artista}>{musica.artista}</Text>
         <Text style={estilos.album}>{musica.album}</Text>
+        <Text style={estilos.genero}>{musica.genero}</Text>
       </View>
 
       {/* Barra de progresso */}
@@ -54,53 +78,73 @@ export default function TocandoMusica({ route, navigation }) {
         />
       </View>
       <View style={estilos.tempoContainer}>
-        <Text style={estilos.tempo}>0:00</Text>
+        <Text style={estilos.tempo}>{tempoAtual}</Text>
         <Text style={estilos.tempo}>{musica.duracao}</Text>
       </View>
 
       {/* Controles de reprodução */}
       <View style={estilos.controlesContainer}>
-        <TouchableOpacity style={estilos.botaoControle}>
+        <TouchableOpacity
+          style={estilos.botaoControle}
+          onPress={musicaAnterior}
+        >
           <Text style={estilos.textoBotaoControle}>⏮️</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={estilos.botaoPlayGrande}
-          onPress={() => {
-            setTocando(!tocando);
-            simularProgresso();
-          }}
+          onPress={() => setTocando(!tocando)}
         >
           <Text style={estilos.textoBotaoPlay}>
             {tocando ? '⏸️' : '▶️'}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={estilos.botaoControle}>
+        <TouchableOpacity
+          style={estilos.botaoControle}
+          onPress={proximaMusica}
+        >
           <Text style={estilos.textoBotaoControle}>⏭️</Text>
         </TouchableOpacity>
       </View>
 
       {/* Botão de favorito */}
       <TouchableOpacity
-        style={estilos.botaoFavoritoGrande}
-        onPress={() => setIsFavorita(!isFavorita)}
+        style={[
+          estilos.botaoFavoritoGrande,
+          favoritada && estilos.botaoFavoritoAtivo,
+        ]}
+        onPress={() => adicionarFavorito(musica.id)}
       >
         <Text style={estilos.textoBotaoFavorito}>
-          {isFavorita ? '❤️ Adicionado aos Favoritos' : '🤍 Adicionar aos Favoritos'}
+          {favoritada ? '❤️ Adicionado aos Favoritos' : '🤍 Adicionar aos Favoritos'}
         </Text>
       </TouchableOpacity>
+
+      {/* Volume */}
+      <View style={estilos.volumeContainer}>
+        <Text style={estilos.volumeLabel}>🔊 Volume</Text>
+        <View style={estilos.volumeBar}>
+          <View
+            style={[
+              estilos.volumeFill,
+              { width: `${volume}%` },
+            ]}
+          />
+        </View>
+        <Text style={estilos.volumeValue}>{volume}%</Text>
+      </View>
 
       {/* Outras opções */}
       <View style={estilos.opcoesContainer}>
         <TouchableOpacity style={estilos.opcao}>
-          <Text style={estilos.textoOpcao}>🔊 Volume</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={estilos.opcao}>
           <Text style={estilos.textoOpcao}>📱 Compartilhar</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={estilos.opcao}>
+          <Text style={estilos.textoOpcao}>➕ Playlist</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -109,33 +153,17 @@ const estilos = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0F0F1E',
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30,
-  },
-  botaoVoltar: {
-    paddingVertical: 10,
-    marginBottom: 20,
-  },
-  textoBotaoVoltar: {
-    color: '#8B5FBF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  erro: {
-    color: '#FFF',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 100,
+    paddingVertical: 20,
   },
   capaMaior: {
-    width: 250,
-    height: 250,
+    width: 260,
+    height: 260,
     backgroundColor: '#8B5FBF',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    marginVertical: 40,
+    marginVertical: 30,
     shadowColor: '#FF69B4',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
@@ -161,11 +189,19 @@ const estilos = StyleSheet.create({
     color: '#8B5FBF',
     marginBottom: 4,
     textAlign: 'center',
+    fontWeight: '600',
   },
   album: {
     fontSize: 14,
     color: '#999',
     textAlign: 'center',
+    marginBottom: 4,
+  },
+  genero: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 4,
   },
   progressoContainer: {
     height: 4,
@@ -202,46 +238,87 @@ const estilos = StyleSheet.create({
   botaoPlayGrande: {
     width: 80,
     height: 80,
-    backgroundColor: '#FF69B4',
     borderRadius: 40,
+    backgroundColor: '#FF69B4',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#FF69B4',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
-    shadowRadius: 15,
-    elevation: 12,
+    shadowRadius: 12,
+    elevation: 8,
   },
   textoBotaoPlay: {
-    fontSize: 40,
+    fontSize: 36,
   },
   botaoFavoritoGrande: {
     backgroundColor: '#1A1A2E',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FF69B4',
+    borderColor: '#8B5FBF',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
     marginBottom: 20,
   },
+  botaoFavoritoAtivo: {
+    backgroundColor: '#8B5FBF',
+    borderColor: '#FF69B4',
+  },
   textoBotaoFavorito: {
-    color: '#FF69B4',
+    color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  volumeContainer: {
+    marginBottom: 30,
+  },
+  volumeLabel: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  volumeBar: {
+    height: 6,
+    backgroundColor: '#333',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  volumeFill: {
+    height: '100%',
+    backgroundColor: '#FF69B4',
+  },
+  volumeValue: {
+    color: '#999',
+    fontSize: 12,
+    textAlign: 'right',
   },
   opcoesContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    gap: 12,
+    marginBottom: 30,
   },
   opcao: {
-    padding: 12,
+    flex: 1,
     backgroundColor: '#1A1A2E',
-    borderRadius: 8,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
   },
   textoOpcao: {
     color: '#FFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  erro: {
+    color: '#FFF',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 100,
   },
 });

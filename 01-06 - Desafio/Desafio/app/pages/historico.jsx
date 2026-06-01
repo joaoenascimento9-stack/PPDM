@@ -6,12 +6,15 @@ import { MusicaCard } from '../components/MusicaCard';
 import { SectionHeader } from '../components/SectionHeader';
 import { EmptyState } from '../components/EmptyState';
 
-export default function Favoritos({ navigation }) {
-  const { musicasFavoritas, adicionarFavorito, adicionarAoHistorico } = useMusicaContext();
+export default function Historico({ navigation }) {
+  const { historico, adicionarFavorito, adicionarAoHistorico } = useMusicaContext();
 
-  const musicasFavoritadas = useMemo(() => {
-    return musicas.filter((musica) => musicasFavoritas.includes(musica.id));
-  }, [musicasFavoritas]);
+  const musicasHistorico = useMemo(() => {
+    const idsUnicos = [...new Set(historico.map((h) => h.id))];
+    return idsUnicos
+      .map((id) => musicas.find((m) => m.id === id))
+      .filter((m) => m !== undefined);
+  }, [historico]);
 
   const handleMusicaPress = (musica) => {
     adicionarAoHistorico(musica);
@@ -25,31 +28,30 @@ export default function Favoritos({ navigation }) {
   return (
     <View style={estilos.container}>
       <SectionHeader
-        title="❤️ Minhas Favoritas"
-        subtitle={musicasFavoritadas.length > 0 ? 'Suas músicas preferidas' : ''}
+        title="📜 Histórico"
+        subtitle={musicasHistorico.length > 0 ? 'Músicas reproduzidas recentemente' : ''}
         showCounter={true}
-        count={musicasFavoritadas.length}
+        count={musicasHistorico.length}
       />
 
-      {musicasFavoritadas.length > 0 ? (
+      {musicasHistorico.length > 0 ? (
         <FlatList
-          data={musicasFavoritadas}
+          data={musicasHistorico}
           renderItem={({ item }) => (
             <MusicaCard
               musica={item}
               onPress={() => handleMusicaPress(item)}
               onPressFavorito={handleFavoritoPress}
-              showGenero={true}
             />
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => `${item.id}-${Math.random()}`}
           contentContainerStyle={estilos.listaPadding}
         />
       ) : (
         <EmptyState
-          emoji="🤍"
-          title="Nenhuma música favoritada"
-          description="Adicione suas músicas favoritas na tela inicial!"
+          emoji="📼"
+          title="Nenhuma música reproduzida"
+          description="Seu histórico aparecerá aqui quando você começar a ouvir!"
         />
       )}
     </View>

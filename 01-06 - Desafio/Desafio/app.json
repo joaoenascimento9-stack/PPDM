@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "SoundWave",
-    "slug": "soundwave-streaming",
+    "name": "MusicFlow",
+    "slug": "musicflow-streaming",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "soundwave",
+    "scheme": "musicflow",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {

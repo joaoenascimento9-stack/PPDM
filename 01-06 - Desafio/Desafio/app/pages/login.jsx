@@ -1,55 +1,84 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { useMusicaContext } from '../context/MusicaContext';
+import { Input } from '../components/Input';
+import { Button } from '../components/Button';
 
 export default function Login({ navigation }) {
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
+  const [erros, setErros] = useState({});
+  const [carregando, setCarregando] = useState(false);
+  const { setUsuarioLogado } = useMusicaContext();
 
-  const validarLogin = () => {
-    if (usuario.trim() === '' || senha.trim() === '') {
-      alert('Por favor, preencha todos os campos');
-      return;
+  const validarEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validarLogin = async () => {
+    const novasErros = {};
+
+    if (!usuario.trim()) {
+      novasErros.usuario = 'E-mail é obrigatório';
+    } else if (!validarEmail(usuario)) {
+      novasErros.usuario = 'E-mail inválido';
     }
-    if (!usuario.includes('@')) {
-      alert('Por favor, insira um e-mail válido');
-      return;
+
+    if (!senha.trim()) {
+      novasErros.senha = 'Senha é obrigatória';
+    } else if (senha.length < 6) {
+      novasErros.senha = 'Senha deve ter no mínimo 6 caracteres';
     }
-    navigation.replace('Principal');
+
+    setErros(novasErros);
+
+    if (Object.keys(novasErros).length === 0) {
+      setCarregando(true);
+      // Simula chamada de API
+      setTimeout(() => {
+        setUsuarioLogado({ email: usuario, nome: usuario.split('@')[0] });
+        navigation.replace('Principal');
+        setCarregando(false);
+      }, 500);
+    }
   };
 
   return (
-    <View style={estilos.container}>
+    <ScrollView style={estilos.container} contentContainerStyle={estilos.scrollContent}>
       <View style={estilos.header}>
         <Text style={estilos.emoji}>🎵</Text>
-        <Text style={estilos.titulo}>SoundWave</Text>
+        <Text style={estilos.titulo}>MusicFlow</Text>
         <Text style={estilos.subtitulo}>Sua música, seu ritmo</Text>
       </View>
 
       <View style={estilos.formulario}>
-        <TextInput
-          style={estilos.input}
-          placeholder="E-mail"
+        <Input
+          label="E-mail"
+          placeholder="seu.email@example.com"
           value={usuario}
           onChangeText={setUsuario}
-          placeholderTextColor="#999"
           keyboardType="email-address"
+          icon="📧"
+          error={erros.usuario}
         />
 
-        <TextInput
-          style={estilos.input}
-          placeholder="Senha"
-          secureTextEntry
+        <Input
+          label="Senha"
+          placeholder="Mínimo 6 caracteres"
           value={senha}
           onChangeText={setSenha}
-          placeholderTextColor="#999"
+          secureTextEntry
+          icon="🔐"
+          error={erros.senha}
         />
 
-        <TouchableOpacity
-          style={estilos.botaoPrincipal}
+        <Button
+          title={carregando ? "Entrando..." : "Entrar"}
           onPress={validarLogin}
-        >
-          <Text style={estilos.botaoTexto}>Entrar</Text>
-        </TouchableOpacity>
+          disabled={carregando}
+          variant="primary"
+        />
 
         <View style={estilos.divisor}>
           <View style={estilos.linha} />
@@ -57,24 +86,29 @@ export default function Login({ navigation }) {
           <View style={estilos.linha} />
         </View>
 
-        <TouchableOpacity
-          style={estilos.botaoSecundario}
+        <Button
+          title="Criar nova conta"
           onPress={() => navigation.navigate('Cadastro')}
-        >
-          <Text style={estilos.botaoTextoSecundario}>Criar nova conta</Text>
-        </TouchableOpacity>
+          variant="secondary"
+        />
+
+        <Text style={estilos.textoDemo}>
+          Demo: Use qualquer email com @, senha com 6+ caracteres
+        </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
     backgroundColor: '#0F0F1E',
+  },
+  scrollContent: {
+    justifyContent: 'center',
+    minHeight: '100%',
+    padding: 20,
   },
   header: {
     alignItems: 'center',
@@ -97,40 +131,10 @@ const estilos = StyleSheet.create({
   formulario: {
     width: '100%',
   },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#333',
-    padding: 16,
-    marginBottom: 15,
-    borderRadius: 10,
-    fontSize: 16,
-    backgroundColor: '#1A1A2E',
-    color: '#FFF',
-  },
-  botaoPrincipal: {
-    width: '100%',
-    backgroundColor: '#FF69B4',
-    padding: 16,
-    borderRadius: 10,
-    marginTop: 10,
-    marginBottom: 20,
-    alignItems: 'center',
-    shadowColor: '#FF69B4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
   divisor: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 24,
   },
   linha: {
     flex: 1,
@@ -142,17 +146,11 @@ const estilos = StyleSheet.create({
     marginHorizontal: 10,
     fontSize: 14,
   },
-  botaoSecundario: {
-    width: '100%',
-    borderWidth: 2,
-    borderColor: '#8B5FBF',
-    padding: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  botaoTextoSecundario: {
-    color: '#8B5FBF',
-    fontSize: 16,
-    fontWeight: '600',
+  textoDemo: {
+    color: '#666',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 16,
+    fontStyle: 'italic',
   },
 });

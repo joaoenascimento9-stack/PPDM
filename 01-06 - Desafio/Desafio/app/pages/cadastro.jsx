@@ -1,31 +1,61 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { useMusicaContext } from '../context/MusicaContext';
+import { Input } from '../components/Input';
+import { Button } from '../components/Button';
 
 export default function Cadastro({ navigation }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confSenha, setConfSenha] = useState('');
+  const [erros, setErros] = useState({});
+  const [carregando, setCarregando] = useState(false);
+  const { setUsuarioLogado } = useMusicaContext();
+
+  const validarEmail = (e) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(e);
+  };
 
   const validarCadastro = () => {
-    if (!nome.trim() || !email.trim() || !senha.trim() || !confSenha.trim()) {
-      alert('Por favor, preencha todos os campos');
-      return;
+    const novasErros = {};
+
+    if (!nome.trim()) {
+      novasErros.nome = 'Nome é obrigatório';
+    } else if (nome.trim().length < 3) {
+      novasErros.nome = 'Nome deve ter no mínimo 3 caracteres';
     }
-    if (!email.includes('@')) {
-      alert('Por favor, insira um e-mail válido');
-      return;
+
+    if (!email.trim()) {
+      novasErros.email = 'E-mail é obrigatório';
+    } else if (!validarEmail(email)) {
+      novasErros.email = 'E-mail inválido';
     }
-    if (senha.length < 6) {
-      alert('A senha deve ter no mínimo 6 caracteres');
-      return;
+
+    if (!senha.trim()) {
+      novasErros.senha = 'Senha é obrigatória';
+    } else if (senha.length < 6) {
+      novasErros.senha = 'Senha deve ter no mínimo 6 caracteres';
     }
-    if (senha !== confSenha) {
-      alert('As senhas não correspondem');
-      return;
+
+    if (!confSenha.trim()) {
+      novasErros.confSenha = 'Confirmação de senha é obrigatória';
+    } else if (senha !== confSenha) {
+      novasErros.confSenha = 'As senhas não correspondem';
     }
-    alert('Cadastro realizado com sucesso! Faça login para continuar.');
-    navigation.navigate('Login');
+
+    setErros(novasErros);
+
+    if (Object.keys(novasErros).length === 0) {
+      setCarregando(true);
+      setTimeout(() => {
+        setUsuarioLogado({ email, nome });
+        alert('🎉 Cadastro realizado com sucesso!');
+        navigation.replace('Principal');
+        setCarregando(false);
+      }, 500);
+    }
   };
 
   return (
@@ -37,62 +67,61 @@ export default function Cadastro({ navigation }) {
       <View style={estilos.header}>
         <Text style={estilos.emoji}>🎵</Text>
         <Text style={estilos.titulo}>Crie sua Conta</Text>
-        <Text style={estilos.subtitulo}>Bem-vindo ao SoundWave</Text>
+        <Text style={estilos.subtitulo}>Bem-vindo ao MusicFlow</Text>
       </View>
 
       <View style={estilos.formulario}>
-        <Text style={estilos.label}>Nome Completo</Text>
-        <TextInput
-          style={estilos.input}
+        <Input
+          label="Nome Completo"
           placeholder="João Silva"
           value={nome}
           onChangeText={setNome}
-          placeholderTextColor="#999"
+          icon="👤"
+          error={erros.nome}
         />
 
-        <Text style={estilos.label}>E-mail</Text>
-        <TextInput
-          style={estilos.input}
+        <Input
+          label="E-mail"
           placeholder="seu.email@example.com"
           value={email}
           onChangeText={setEmail}
-          placeholderTextColor="#999"
           keyboardType="email-address"
+          icon="📧"
+          error={erros.email}
         />
 
-        <Text style={estilos.label}>Senha</Text>
-        <TextInput
-          style={estilos.input}
+        <Input
+          label="Senha"
           placeholder="Mínimo 6 caracteres"
           value={senha}
           onChangeText={setSenha}
-          placeholderTextColor="#999"
           secureTextEntry
+          icon="🔐"
+          error={erros.senha}
         />
 
-        <Text style={estilos.label}>Confirmar Senha</Text>
-        <TextInput
-          style={estilos.input}
+        <Input
+          label="Confirmar Senha"
           placeholder="Repita sua senha"
           value={confSenha}
           onChangeText={setConfSenha}
-          placeholderTextColor="#999"
           secureTextEntry
+          icon="🔐"
+          error={erros.confSenha}
         />
 
-        <TouchableOpacity
-          style={estilos.botaoCadastro}
+        <Button
+          title={carregando ? "Criando conta..." : "Criar Conta"}
           onPress={validarCadastro}
-        >
-          <Text style={estilos.botaoTexto}>Criar Conta</Text>
-        </TouchableOpacity>
+          disabled={carregando}
+          variant="primary"
+        />
 
-        <TouchableOpacity
-          style={estilos.botaoVoltar}
+        <Button
+          title="Já tem conta? Faça login"
           onPress={() => navigation.navigate('Login')}
-        >
-          <Text style={estilos.botaoVoltarTexto}>Já tem conta? Faça login</Text>
-        </TouchableOpacity>
+          variant="secondary"
+        />
       </View>
     </ScrollView>
   );
@@ -128,56 +157,5 @@ const estilos = StyleSheet.create({
   },
   formulario: {
     width: '100%',
-  },
-  label: {
-    color: '#8B5FBF',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 15,
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#333',
-    padding: 14,
-    marginBottom: 15,
-    borderRadius: 10,
-    fontSize: 16,
-    backgroundColor: '#1A1A2E',
-    color: '#FFF',
-  },
-  botaoCadastro: {
-    width: '100%',
-    backgroundColor: '#FF69B4',
-    padding: 16,
-    borderRadius: 10,
-    marginTop: 30,
-    marginBottom: 15,
-    alignItems: 'center',
-    shadowColor: '#FF69B4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  botaoVoltar: {
-    width: '100%',
-    borderWidth: 2,
-    borderColor: '#8B5FBF',
-    padding: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  botaoVoltarTexto: {
-    color: '#8B5FBF',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

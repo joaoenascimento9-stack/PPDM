@@ -1,9 +1,9 @@
-# SoundWave - Aplicativo de Streaming de Música
+# MusicFlow - Aplicativo de Streaming de Música
 
 ## Planejamento da Solução
 
 ### Nome do App
-**SoundWave** - Uma plataforma de streaming de música moderna e elegante.
+**MusicFlow** - Uma plataforma de streaming de música moderna e elegante.
 
 ### Paleta de Cores
 - **Roxo Primário**: #8B5FBF (identidade da marca)

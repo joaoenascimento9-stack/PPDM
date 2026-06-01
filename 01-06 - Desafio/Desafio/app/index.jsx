@@ -1,8 +1,10 @@
-import Rotas from './routes'
+import { MusicaProvider } from './context/MusicaContext';
+import Rotas from './routes';
 
 export default function Index() {
-    
   return (
-    <Rotas />
+    <MusicaProvider>
+      <Rotas />
+    </MusicaProvider>
   );
 }

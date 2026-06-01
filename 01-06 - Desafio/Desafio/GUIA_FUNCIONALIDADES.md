@@ -1,4 +1,4 @@
-# 🎵 SoundWave - Guia de Funcionalidades
+# 🎵 MusicFlow - Guia de Funcionalidades
 
 ## ✅ Implementação Concluída
 
@@ -8,7 +8,7 @@
 ```
 ┌─────────────────────────┐
 │         🎵              │
-│      SoundWave          │
+│      MusicFlow          │
 │  Sua música, seu ritmo  │
 ├─────────────────────────┤
 │  E-mail:                │
@@ -37,7 +37,7 @@
 │    ← Criar Conta        │
 │         🎵              │
 │    Crie sua Conta       │
-│ Bem-vindo ao SoundWave  │
+│ Bem-vindo ao MusicFlow  │
 ├─────────────────────────┤
 │ Nome Completo:          │
 │ [João Silva...........]│
@@ -68,10 +68,10 @@
 #### 3️⃣ **Tela Inicial**
 ```
 ┌─────────────────────────┐
-│   SoundWave             │ 🏠 | ❤️
+│   MusicFlow             │ 🏠 | ❤️
 ├─────────────────────────┤
 │ Bem-vindo ao            │
-│ SoundWave               │
+│ MusicFlow               │
 ├─────────────────────────┤
 │ 🎵 Recomendado para você│
 ├─────────────────────────┤
@@ -317,7 +317,7 @@ npm run lint
 - ✅ Tela tocando música
 - ✅ Navegação entre telas (Stack + Tabs)
 - ✅ Identidade visual coerente
-- ✅ Nome fictício (SoundWave)
+- ✅ Nome fictício (MusicFlow)
 - ✅ Paleta de cores definida
 - ✅ Mínimo 8 músicas mockadas (temos 10)
 - ✅ Validação em cadastro e login
